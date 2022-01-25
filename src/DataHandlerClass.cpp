@@ -1,5 +1,5 @@
 #include <DataHandlerClass.h>
-
+#include <pcl_conversions/pcl_conversions.h>
 
 DataUARTHandler::DataUARTHandler(ros::NodeHandle* nh) : currentBufp(&pingPongBuffers[0]) , nextBufp(&pingPongBuffers[1]) {
     DataUARTHandler_pub = nh->advertise<sensor_msgs::PointCloud2>("/ti_mmwave/radar_scan_pcl", 100);
@@ -686,7 +686,10 @@ void *DataUARTHandler::sortIncomingData( void )
                     //ROS_INFO("mmwData.numObjOut after = %d", mmwData.numObjOut);
                     //ROS_INFO("DataUARTHandler Sort Thread: number of obj = %d", mmwData.numObjOut );
 
-                    DataUARTHandler_pub.publish(RScan);
+                    sensor_msgs::PointCloud2 cloud_msg;
+                    pcl::toROSMsg(*RScan, cloud_msg);
+                    cloud_msg.header.stamp = ros::Time::now();
+                    DataUARTHandler_pub.publish(cloud_msg);
                 }
 
                 //ROS_INFO("DataUARTHandler Sort Thread : CHECK_TLV_TYPE state says tlvCount max was reached, going to switch buffer state");

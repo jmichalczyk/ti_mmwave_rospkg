@@ -456,9 +456,9 @@ void *DataUARTHandler::sortIncomingData( void )
                     uint16_t tmp = (uint16_t)(temp[3] + nd / 2);
 
                     // Map mmWave sensor coordinates to ROS coordinate system
-                    RScan->points[i].x = temp[1];   // ROS standard coordinate system X-axis is forward which is the mmWave sensor Y-axis
-                    RScan->points[i].y = -temp[0];  // ROS standard coordinate system Y-axis is left which is the mmWave sensor -(X-axis)
-                    RScan->points[i].z = temp[2];   // ROS standard coordinate system Z-axis is up which is the same as mmWave sensor Z-axis
+                    RScan->points[i].data[0] = temp[1];   // ROS standard coordinate system X-axis is forward which is the mmWave sensor Y-axis
+                    RScan->points[i].data[1] = -temp[0];  // ROS standard coordinate system Y-axis is left which is the mmWave sensor -(X-axis)
+                    RScan->points[i].data[2] = temp[2];   // ROS standard coordinate system Z-axis is up which is the same as mmWave sensor Z-axis
                     RScan->points[i].intensity = temp[5];
 
                     radarscan.header.frame_id = frameID;
@@ -491,9 +491,9 @@ void *DataUARTHandler::sortIncomingData( void )
                     currentDatap += ( sizeof(mmwData.newObjOut.velocity) );
 
                     // Map mmWave sensor coordinates to ROS coordinate system
-                    RScan->points[i].x = mmwData.newObjOut.y;   // ROS standard coordinate system X-axis is forward which is the mmWave sensor Y-axis
-                    RScan->points[i].y = -mmwData.newObjOut.x;  // ROS standard coordinate system Y-axis is left which is the mmWave sensor -(X-axis)
-                    RScan->points[i].z = mmwData.newObjOut.z;   // ROS standard coordinate system Z-axis is up which is the same as mmWave sensor Z-axis
+                    RScan->points[i].data[0] = mmwData.newObjOut.y;   // ROS standard coordinate system X-axis is forward which is the mmWave sensor Y-axis
+                    RScan->points[i].data[1] = -mmwData.newObjOut.x;  // ROS standard coordinate system Y-axis is left which is the mmWave sensor -(X-axis)
+                    RScan->points[i].data[2] = mmwData.newObjOut.z;   // ROS standard coordinate system Z-axis is up which is the same as mmWave sensor Z-axis
                     RScan->points[i].data[3] = mmwData.newObjOut.velocity;
 
                     radarscan.header.frame_id = frameID;
@@ -520,12 +520,12 @@ void *DataUARTHandler::sortIncomingData( void )
                 }
 
                 if (((maxElevationAngleRatioSquared == -1) ||
-                             (((RScan->points[i].z * RScan->points[i].z) / (RScan->points[i].x * RScan->points[i].x +
-                                                                            RScan->points[i].y * RScan->points[i].y)
+                             (((RScan->points[i].data[2] * RScan->points[i].data[2]) / (RScan->points[i].data[0] * RScan->points[i].data[0] +
+                                                                            RScan->points[i].data[1] * RScan->points[i].data[1])
                               ) < maxElevationAngleRatioSquared)
                             ) &&
-                            ((maxAzimuthAngleRatio == -1) || (fabs(RScan->points[i].y / RScan->points[i].x) < maxAzimuthAngleRatio)) &&
-                                    (RScan->points[i].x != 0)
+                            ((maxAzimuthAngleRatio == -1) || (fabs(RScan->points[i].data[1] / RScan->points[i].data[0]) < maxAzimuthAngleRatio)) &&
+                                    (RScan->points[i].data[0] != 0)
                            )
                 {
                     radar_scan_pub.publish(radarscan);
@@ -663,12 +663,12 @@ void *DataUARTHandler::sortIncomingData( void )
                         // Keep point if elevation and azimuth angles are less than specified max values
                         // (NOTE: The following calculations are done using ROS standard coordinate system axis definitions where X is forward and Y is left)
                         if (((maxElevationAngleRatioSquared == -1) ||
-                             (((RScan->points[i].z * RScan->points[i].z) / (RScan->points[i].x * RScan->points[i].x +
-                                                                            RScan->points[i].y * RScan->points[i].y)
+                             (((RScan->points[i].data[2] * RScan->points[i].data[2]) / (RScan->points[i].data[0] * RScan->points[i].data[0] +
+                                                                            RScan->points[i].data[1] * RScan->points[i].data[1])
                               ) < maxElevationAngleRatioSquared)
                             ) &&
-                            ((maxAzimuthAngleRatio == -1) || (fabs(RScan->points[i].y / RScan->points[i].x) < maxAzimuthAngleRatio)) &&
-                                    (RScan->points[i].x != 0)
+                            ((maxAzimuthAngleRatio == -1) || (fabs(RScan->points[i].data[1] / RScan->points[i].data[0]) < maxAzimuthAngleRatio)) &&
+                                    (RScan->points[i].data[0] != 0)
                            )
                         {
                             //ROS_INFO("Kept point");
